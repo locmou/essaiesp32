@@ -100,8 +100,8 @@ void setup() {
  */
 void loop() {
 	if (gotNewTemperature) {
-		Serial.println("Sensor data: ");
-		Serial.print("Temp: " + String(sensor1Data.temperature,2) + "'C Humidity: " + String(sensor1Data.humidity,1) + "%");
+		Serial.print("Sensor data: ");
+		Serial.println("Temp: " + String(sensor1Data.temperature,2) + "'C Humidity: " + String(sensor1Data.humidity,1) + "%");
 
 		gotNewTemperature = false;
 	}
