@@ -18,7 +18,7 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // Adapter l'adresse I2C (0x27 ou 0x3F)
 /** Task handle for the light value read task */
 TaskHandle_t tempTaskHandle = NULL;
 /** Pin number for DHT11 1 data pin */
-int dhtPin1 = 32;
+int dhtPin1 = 34;
 
 /** Ticker for temperature reading */
 Ticker tempTicker;
