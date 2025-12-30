@@ -1,11 +1,8 @@
 #include <Arduino.h>
 
 
-
 #include "DHTesp.h" // Click here to get the library: http://librarymanager/All#DHTesp
-
 #include <LiquidCrystal_I2C.h>
-
 
 /** Initialize DHT sensor 1 */
 DHTesp dhtSensor;
@@ -15,9 +12,6 @@ LiquidCrystal_I2C lcd(0x27, 20, 4); // Adapter l'adresse I2C (0x27 ou 0x3F)
 
 // Définir la broche 33 comme entrée analogique
 const int photoresistorPin = 33;
-
-/** Task handle for the light value read task */
-TaskHandle_t tempTaskHandle = NULL;
 
 /** Pin number for DHT11 1 data pin */
 const int dhtPin = 32;
@@ -39,12 +33,6 @@ void setup() {
 	dhtSensor.setup(dhtPin, DHTesp::DHT11);
 } // End of setup.
 
-
-/**
- * loop
- * Arduino loop function, called once 'setup' is complete (your own code
- * should go here)
- */
 void loop() {
 
 // Lecture des données du capteur
@@ -58,7 +46,6 @@ void loop() {
   Serial.println("%");
 
   // Affichage sur le LCD
-  lcd.init();
   lcd.setCursor(0, 0);  lcd.print("Temp: ");  lcd.print(data.temperature, 1);  lcd.print(" C");
   lcd.setCursor(0, 1);  lcd.print("Hum: ");  lcd.print(data.humidity, 1);  lcd.print(" %");
 
@@ -68,4 +55,6 @@ void loop() {
 
   // Attendre 30 secondes avant la prochaine lecture
   delay(2000);
+
+  
 } // End of loop
