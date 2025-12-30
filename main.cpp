@@ -1,8 +1,9 @@
 #include <Arduino.h>
+
 #include <Ticker.h>
 
 #include "DHTesp.h" // Click here to get the library: http://librarymanager/All#DHTesp
-
+#include <LiquidCrystal_I2C.h>
 #ifndef ESP32
 #pragma message(THIS EXAMPLE IS FOR ESP32 ONLY!)
 #error Select ESP32 board.
@@ -10,6 +11,9 @@
 
 /** Initialize DHT sensor 1 */
 DHTesp dhtSensor1;
+
+// ---------- CONFIG LCD ----------
+LiquidCrystal_I2C lcd(0x27, 20, 4); // Adapter l'adresse I2C (0x27 ou 0x3F)
 
 /** Task handle for the light value read task */
 TaskHandle_t tempTaskHandle = NULL;
@@ -67,6 +71,11 @@ void setup() {
 	Serial.begin(115200);
 	Serial.println("Example for 3 DHT11/22 sensors");
 
+	  // LCD
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0, 0);
 	// Initialize temperature sensor 1
 	dhtSensor1.setup(dhtPin1, DHTesp::DHT11);
 
@@ -102,6 +111,11 @@ void loop() {
 	if (gotNewTemperature) {
 		Serial.print("Sensor data: ");
 		Serial.println("Temp: " + String(sensor1Data.temperature,2) + "'C Humidity: " + String(sensor1Data.humidity,1) + "%");
+   		
+		// Affichage LCD 20x4
+    	lcd.clear();
+    	lcd.setCursor(0, 0);
+    	lcd.print("Temp: " + String(sensor1Data.temperature,2) + "'C Humidity: " + String(sensor1Data.humidity,1) + "%");
 
 		gotNewTemperature = false;
 	}
