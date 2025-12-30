@@ -15,6 +15,9 @@ DHTesp dhtSensor1;
 // ---------- CONFIG LCD ----------
 LiquidCrystal_I2C lcd(0x27, 20, 4); // Adapter l'adresse I2C (0x27 ou 0x3F)
 
+// Définir la broche 33 comme entrée analogique
+const int photoresistorPin = 33;
+
 /** Task handle for the light value read task */
 TaskHandle_t tempTaskHandle = NULL;
 /** Pin number for DHT11 1 data pin */
@@ -119,4 +122,10 @@ void loop() {
 
 		gotNewTemperature = false;
 	}
+
+	  int lumi = analogRead(photoresistorPin);
+	  Serial.println(lumi);
+  // Attendre un peu avant la prochaine lecture
+  delay(1000); // 1 seconde
+  
 } // End of loop
