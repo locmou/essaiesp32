@@ -15,7 +15,7 @@ const uint8_t dhtPin = 32;
 const uint8_t BRIGHTNESS_PIN=5;   // Must be a PWM pin
 // Définir la broche 33 comme entrée analogique
 const uint8_t LDR = 33;
-const uint8_t bright;
+uint8_t bright;
 
 // Ajuste le rétroéclairage en fonction de la mesure de luminosité ambiante
 void Retroeclairage()
