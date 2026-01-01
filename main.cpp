@@ -59,7 +59,7 @@ void loop() {
   lcd.setCursor(0, 1);  lcd.print("Hum: ");  lcd.print(data.humidity, 1);  lcd.print(" %");
 
 // Lecture luminosité
-  int lumi = analogRead(photoresistorPin);
+  int lumi = analogRead(LDR);
   lcd.setCursor(0, 2);  lcd.print("Lum: ");  lcd.print(lumi);
 
 // Attendre 30 secondes avant la prochaine lecture
