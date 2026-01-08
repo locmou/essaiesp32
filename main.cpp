@@ -21,7 +21,7 @@ uint8_t bright;
 void Retroeclairage(){
 //réglage de l'intensité lumineus du LCD selon la lumière ambiante
   bright=(analogRead(LDR)/4);
-  analogWrite(BRIGHTNESS_PIN, 255-bright);
+  analogWrite(BRIGHTNESS_PIN, bright);
   }
 
   void setup() {
@@ -43,6 +43,8 @@ void Retroeclairage(){
 } 
 
 void loop() {
+// réglage led rétroéclairage
+  Retroeclairage();
 
 // Lecture des données du capteur
   TempAndHumidity data = dhtSensor.getTempAndHumidity();
