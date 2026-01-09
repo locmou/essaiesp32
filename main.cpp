@@ -18,6 +18,11 @@ const uint8_t BRIGHTNESS_PIN=5;   // Must be a PWM pin
 const uint8_t LDR = 33;
 uint8_t bright;
 
+// ---------- CONFIG MQ-7 / ESP32 ----------
+#define MQ7_PIN 34              // Entrée analogique
+#define MESURE_INTERVAL 10000    // ms entre deux mesures + publication
+unsigned long lastMeasure = 0;
+
 void Retroeclairage(){
 //réglage de l'intensité lumineus du LCD selon la lumière ambiante
   bright=(analogRead(LDR)/4);
@@ -57,14 +62,54 @@ void loop() {
   Serial.println("%");
 
 // Affichage sur le LCD
-  lcd.setCursor(0, 0);  lcd.print("Temp: ");  lcd.print(data.temperature, 1);  lcd.print(" C");
-  lcd.setCursor(0, 1);  lcd.print("Hum: ");  lcd.print(data.humidity, 1);  lcd.print(" %");
+  lcd.setCursor(0, 0);  lcd.print("T°: ");  lcd.print(data.temperature, 1);  lcd.print(" C");
+  lcd.setCursor(10, 0);  lcd.print("Hum: ");  lcd.print(data.humidity, 1);  lcd.print(" %");
 
-// Lecture luminosité
-  int lumi = analogRead(LDR);
-  lcd.setCursor(0, 2);  lcd.print("Lum: ");  lcd.print(lumi);
+// Affichage bright 
+  lcd.setCursor(0, 1);  lcd.print("Bright: ");  lcd.print(bright);
 
 // Attendre 30 secondes avant la prochaine lecture
   delay(2000);
+
+// Lecture MQ7
+  unsigned long now = millis();
+    if (now - lastMeasure > MESURE_INTERVAL) {
+     lastMeasure = now;
+
+    // Lecture brute du MQ-7 (0-4095 sur ESP32)
+    int rawValue = analogRead(MQ7_PIN);
+
+    // Conversion approximative en "pseudo ppm"
+    float pseudoPPM = (rawValue / 4095.0) * 1000.0;
+
+// Affichage série
+    /*Serial.print("MQ7 brut = ");
+    Serial.print(rawValue);
+    Serial.print("  ~");
+    Serial.print(pseudoPPM);
+    Serial.println(" ppm (approx)");*/
+
+    // Affichage LCD 20x4
+    lcd.setCursor(0, 2);
+    lcd.print("CO MQ7 =>  "); lcd.print("Brut : "); lcd.print(rawValue);
+
+    lcd.setCursor(0, 3);
+    lcd.print("Approx : ");
+    lcd.print((int)pseudoPPM);
+    lcd.print(" ppm");
+
+/*
+    lcd.setCursor(0, 3);
+    lcd.print("WiFi: ");
+    lcd.print(WiFi.SSID());
+*/
+/*
+    // Publication MQTT (envoi de la valeur brute)
+    char payload[32];
+    snprintf(payload, sizeof(payload), "%d", rawValue);
+    client.publish(mqtt_topic, payload);
+*/
+
+  }
 
 }
