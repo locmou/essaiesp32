@@ -30,9 +30,11 @@ void Retroeclairage(){
   }
 
   void setup() {
+    /*
 // 
 	Serial.begin(115200);
 	Serial.println("Lecture DHT11 + affichage LCD");
+*/
 
 // Déclaration des broches
   pinMode(BRIGHTNESS_PIN, OUTPUT);
@@ -45,6 +47,7 @@ void Retroeclairage(){
 
 // Initialize temperature sensor 1
   dhtSensor.setup(dhtPin, DHTesp::DHT11);
+  
 } 
 
 void loop() {
