@@ -65,8 +65,8 @@ void loop() {
   Serial.println("%");
 
 // Affichage sur le LCD
-  lcd.setCursor(0, 0);  lcd.print("T°: ");  lcd.print(data.temperature, 1);  lcd.print(" C");
-  lcd.setCursor(10, 0);  lcd.print("Hum: ");  lcd.print(data.humidity, 1);  lcd.print(" %");
+  lcd.setCursor(0, 0);  lcd.print("Tmp:");  lcd.print(data.temperature, 1);  lcd.print(" C");
+  lcd.setCursor(10, 0);  lcd.print("Hum:");  lcd.print(data.humidity, 1);  lcd.print(" %");
 
 // Affichage bright 
   lcd.setCursor(0, 1);  lcd.print("Bright: ");  lcd.print(bright);
