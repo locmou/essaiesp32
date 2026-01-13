@@ -159,33 +159,32 @@ void setup() {
 
 /*********************************************VOID LOOP ************************************************ */
 void loop() {
-  // réglage led rétroéclairage
-  Retroeclairage();
 
-  // Lecture des données du capteur
-  TempAndHumidity data = dhtSensor.getTempAndHumidity();
-
-  // Affichage sur le moniteur série
-  Serial.print("Température: ");
-  Serial.print(data.temperature, 1);
-  Serial.print("°C, Humidité: ");
-  Serial.print(data.humidity, 1);
-  Serial.println("%");
-
-  // Affichage sur le LCD
-  lcd.setCursor(0, 0);  lcd.print("Tmp:");  lcd.print(data.temperature, 1);  lcd.print(" C");
-  lcd.setCursor(10, 0);  lcd.print("Hum:");  lcd.print(data.humidity, 1);  lcd.print(" %");
-
-  // Affichage bright 
-  lcd.setCursor(0, 1);  lcd.print("Bright: ");  lcd.print(bright);
-
-  // Attendre 30 secondes avant la prochaine lecture
-  delay(2000);
-
-  // Lecture MQ7
   unsigned long now = millis();
   if (now - lastMeasure > MESURE_INTERVAL) {
     lastMeasure = now;
+
+    // réglage led rétroéclairage
+    Retroeclairage();
+
+    // Lecture des données du capteur
+    TempAndHumidity data = dhtSensor.getTempAndHumidity();
+
+    /*
+    // Affichage sur le moniteur série
+    Serial.print("Température: ");
+    Serial.print(data.temperature, 1);
+    Serial.print("°C, Humidité: ");
+    Serial.print(data.humidity, 1);
+    Serial.println("%");
+    */
+
+    // Affichage sur le LCD
+    lcd.setCursor(0, 0);  lcd.print("Tmp:");  lcd.print(data.temperature, 1);  lcd.print(" C");
+    lcd.setCursor(10, 0);  lcd.print("Hum:");  lcd.print(data.humidity, 1);  lcd.print(" %");
+
+    // Affichage bright 
+    lcd.setCursor(0, 1);  lcd.print("Bright: ");  lcd.print(bright);
 
     // Lecture brute du MQ-7 (0-4095 sur ESP32)
     int rawValue = analogRead(MQ7_PIN);
