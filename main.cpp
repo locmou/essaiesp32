@@ -202,6 +202,13 @@ void loop() {
     float press_hPa = bmp.readPressure() / 100.0F;  // hPa[web:1]
 
     // ----- Affichage -----
+    lcd.setCursor(0, 0);  lcd.print("Tmp:");  lcd.print(tempAHT.temperature);  lcd.print(" C");
+    lcd.setCursor(10, 0);  lcd.print("Hum:");  lcd.print(humid.relative_humidity);  lcd.print(" %");
+    lcd.setCursor(0, 1);  lcd.print("Press:");  lcd.print(press_hPa);  lcd.print(" hPa");
+    lcd.setCursor(10, 1);  lcd.print("Bright:");  lcd.print(bright);  
+
+
+    //---------Affichagesérie--------
     Serial.println("===== Mesures =====");
     Serial.print("AHT20  - T: ");
     Serial.print(tempAHT.temperature);
@@ -231,7 +238,7 @@ void loop() {
     lcd.print("CO MQ7 =>  "); lcd.print("Brut : "); lcd.print(rawValue);
 
     lcd.setCursor(0, 3);
-    lcd.print("Approx : ");
+    lcd.print("Approx :");
     lcd.print((int)pseudoPPM);
     lcd.print(" ppm");
 
