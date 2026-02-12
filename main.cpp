@@ -20,7 +20,7 @@ void reconnect() {
 
       client.publish(
         "homeassistant/sensor/stationair_temp/config",
-        "{\"name\":\"Temp\",\"uniq_id\":\"stationair_temp\",\"stat_t\":\"stationair/temp\",\"avty_t\":\"stationair/status\",\"dev_cla\":\"temperature\",\"unit_of_meas\":\"°C\",\"device\":{\"ids\":[\"stationair\"],\"name\":\"Station Air\"}}",
+        "{\"name\":\"Temp\",\"uniq_id\":\"stationair_temp_v2\",\"stat_t\":\"stationair/temp\",\"avty_t\":\"stationair/status\",\"dev_cla\":\"temperature\",\"unit_of_meas\":\"°C\",\"device\":{\"ids\":[\"stationair_v2\"],\"name\":\"Station Air\"}}",
         true
       );
 
