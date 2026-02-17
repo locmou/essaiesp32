@@ -216,21 +216,21 @@ void printBigDigit(int digit, int col, int row) {
 }
 
 // Affiche un nombre entier en gros au centre des lignes 2-3
-void printBigNumber(int number) {
-  lcd.setCursor(0, 2); lcd.print("                    "); // Effacer ligne 2
-  lcd.setCursor(0, 3); lcd.print("                    "); // Effacer ligne 3
+void printBigNumber(int number, int col) {
+  lcd.setCursor(0, 0); lcd.print("                    "); // Effacer ligne 2
+  lcd.setCursor(0, 1); lcd.print("                    "); // Effacer ligne 3
   
   // Convertir en string pour compter les chiffres
   String numStr = String(number);
   int numDigits = numStr.length();
-  
+  /*/
   // Calcul position de départ pour centrer (chaque chiffre = 3 colonnes + 1 espace)
   int startCol = (20 - (numDigits * 4 - 1)) / 2;
-  
+  */
   // Afficher chaque chiffre
   for(int i = 0; i < numDigits; i++) {
     int digit = numStr.charAt(i) - '0';  // Convertir char en int
-    printBigDigit(digit, startCol + (i * 4), 2);
+    printBigDigit(digit, col + (i * 4), 0);
   }
 }
 
@@ -430,6 +430,7 @@ void setup() {
 /*********************************************LOOP ************************************************ */
 
 void loop() {
+
   unsigned long now = millis();
 
   /* toutes les secondes : client loop et actualisation du bright*/
@@ -445,6 +446,8 @@ void loop() {
     lcd.setCursor(0, 3);
     Serial.print("bright : ");
     Serial.print(bright);
+    lcd.setCursor(0, 1);
+    printBigNumber((int)tempAHT.temperature,3);
   }
 
   /*Toutes les 30' vérification mqtt */
