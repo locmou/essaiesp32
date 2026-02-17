@@ -41,6 +41,7 @@ int rawValue;
 float rs;
 float ratio;
 float ppm;
+float press_hPa;
 
 // Caractères personnalisés optimisés pour chiffres LCD
 byte LT[8] = {B00111, B01111, B11111, B11111, B11111, B11111, B11111, B11111};  // 0: Left Top
@@ -441,15 +442,14 @@ void loop() {
     }
     //ajuste en permanence l'intensité du rétroéclairage
     Retroeclairage();
+    lcd.setCursor(0, 3);
     Serial.print("bright : ");
-    Serial.println(bright);
-
-
+    Serial.print(bright);
   }
 
-  /*Toutes les 30' vérification mqtt et mesures et affichage*/
+  /*Toutes les 30' vérification mqtt */
 
-  // ===== VÉRIFICATION WIFI + MQTT TOUTES LES 30 SECONDES =====
+  // ===== VÉRIFICATION WIFI + MQTT + lecture  capteurs TOUTES LES 30 SECONDES =====
   if (now - last_30s_time >= CYCLE_30s) {
     last_30s_time = now;   
 
@@ -538,10 +538,8 @@ void loop() {
       Serial.println("MQTT: Non connecté, données non publiées");
     }
   }
-
-  // ===== AFFICHAGE LCD LIGNES 2-3 (continue même sans WiFi/MQTT) =====
-
-
+/*
+  // ===== AFFICHAGE LCD LIGNES 2-3 =====
   // Alternance d'affichage
   if (now - lastDisplayChange >= DISPLAY_DURATION) {
     lastDisplayChange = now;
@@ -586,6 +584,6 @@ void loop() {
       lastDisplayedInfo = currentInfo;
     }
   }
-
+*/
   delay(10);
 } // FIN du loop
