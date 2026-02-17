@@ -31,12 +31,12 @@ uint8_t bright;
 
 // ---------- CONFIG MQ-7 / ESP32 ----------
 #define MQ7_PIN 34              // Entrée analogique
-#define MESURE_INTERVAL 180000    // 3mn entre deux mesures + publication 
+#define CYCLE_3mn 180000    // 3mn entre deux mesures + publication 
 #define RL_VALUE 10.0           // Résistance de charge en kOhms (10kΩ sur Flying Fish)
 #define RO_CLEAN_AIR_FACTOR 27.5 // Ratio RS/RO dans l'air pur pour MQ7
 #define ADC_RESOLUTION 4095.0   // Résolution ADC 12 bits ESP32
 float Ro = 1.95;  // Résistance du capteur dans l'air pur (valeur par défaut, à calibrer)
-unsigned long lastMeasure = -MESURE_INTERVAL;
+unsigned long last_3m_time = -CYCLE_3mn;
 
 // Caractères personnalisés optimisés pour chiffres LCD
 byte LT[8] = {B00111, B01111, B11111, B11111, B11111, B11111, B11111, B11111};  // 0: Left Top
@@ -69,9 +69,9 @@ const char* mqtt_user = "loic.mounier@laposte.net";
 const char* mqtt_pass = "vgo:?2258H";
 
 // ========== AJOUT : Variables pour gestion des reconnexions ==========
-unsigned long lastWifiCheck = 0;
-unsigned long lastClientLoop = 0; 
-const unsigned long WIFI_CHECK_INTERVAL = 30000;   // Vérifier WiFi toutes les 30s
+unsigned long last_30s_time = 0;
+unsigned long last_1s_time = 0; 
+const unsigned long CYCLE_30s = 30000;   // Vérifier WiFi toutes les 30s
 int mqttReconnectAttempts = 0;
 const int MAX_MQTT_ATTEMPTS = 3;                   // Max 3 tentatives avant d'abandonner temporairement
 static bool mqttWasDisconnected = false;  
@@ -415,10 +415,13 @@ void setup() {
 
 void loop() {
   unsigned long now = millis();
-  
+
+  /* toutes les secondes : client loop et actualisation du bright*/
+
+
   // ===== CLIENT.LOOP() TOUTES LES SECONDES et ajustement éclairage =====
-  if (now - lastClientLoop >= 1000) {
-    lastClientLoop = now;
+  if (now - last_1s_time >= 1000) {
+    last_1s_time = now;
     if (client.connected()) {
       client.loop();
     }
@@ -428,10 +431,41 @@ void loop() {
     Serial.println(bright);
   }
 
+  /*Toutes les 30' vérification mqtt et mesures et affichage*/
+
   // ===== VÉRIFICATION WIFI + MQTT TOUTES LES 30 SECONDES =====
-  if (now - lastWifiCheck >= WIFI_CHECK_INTERVAL) {
-    lastWifiCheck = now;
+  if (now - last_30s_time >= CYCLE_30s) {
+    last_30s_time = now;   
+
+    // Lecture capteurs
+    sensors_event_t humid, tempAHT;
+    aht.getEvent(&humid, &tempAHT);
+    float press_hPa = bmp.readPressure() / 100.0F;
     
+    int rawValue = analogRead(MQ7_PIN);
+    float rs = readRS(rawValue);
+    float ratio = rs / Ro;
+    float ppm = calculatePPM(ratio);
+   
+    // Affichage série
+    Serial.println("===== Mesures =====");
+    Serial.printf("T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.0fppm\n", tempAHT.temperature, humid.relative_humidity, press_hPa, ppm);
+    
+    // LCD ligne 0-1
+    lcd.setCursor(0, 0); 
+    lcd.printf("Tmp:%.1fC Hum:%.1f%%", tempAHT.temperature, humid.relative_humidity);
+    lcd.setCursor(0, 1);
+    // Afficher statut connexion
+    if (WiFi.status() != WL_CONNECTED) {
+      lcd.print("WiFi:OFF ");
+    } else if (!client.connected()) {
+      lcd.print("MQTT:OFF ");
+    } else {
+      lcd.printf("P:%.0f Lum:%-3d    ", press_hPa, bright);
+    }
+
+
+
     // 1. Vérifier WiFi
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi perdu, reconnexion...");
@@ -464,36 +498,9 @@ void loop() {
   }
   }
 
-// ===== MESURES PÉRIODIQUES (toutes les 3 minutes) =====
-  if (now - lastMeasure > MESURE_INTERVAL) {
-    lastMeasure = now;
-    
-    // Lecture capteurs
-    sensors_event_t humid, tempAHT;
-    aht.getEvent(&humid, &tempAHT);
-    float press_hPa = bmp.readPressure() / 100.0F;
-    
-    int rawValue = analogRead(MQ7_PIN);
-    float rs = readRS(rawValue);
-    float ratio = rs / Ro;
-    float ppm = calculatePPM(ratio);
-
-    // Affichage série
-    Serial.println("===== Mesures =====");
-    Serial.printf("T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.0fppm\n", tempAHT.temperature, humid.relative_humidity, press_hPa, ppm);
-
-    // LCD ligne 0-1
-    lcd.setCursor(0, 0); 
-    lcd.printf("Tmp:%.1fC Hum:%.1f%%", tempAHT.temperature, humid.relative_humidity);
-    lcd.setCursor(0, 1);
-    // Afficher statut connexion
-    if (WiFi.status() != WL_CONNECTED) {
-      lcd.print("WiFi:OFF ");
-    } else if (!client.connected()) {
-      lcd.print("MQTT:OFF ");
-    } else {
-      lcd.printf("P:%.0f Lum:%-3d    ", press_hPa, bright);
-    }
+  // ===== Envoi périodique MQTT (toutes les 3 minutes) =====
+  if (now - last_3m_time > CYCLE_3mn) {
+    last_3m_time = now;
     
     // Publication MQTT seulement si connecté
     if (client.connected()) {
