@@ -216,9 +216,9 @@ void printBigDigit(int digit, int col, int row) {
 }
 
 // Affiche un nombre entier en gros au centre des lignes 2-3
-void printBigNumber(int number, int col) {
-  lcd.setCursor(0, 0); lcd.print("                    "); // Effacer ligne 2
-  lcd.setCursor(0, 1); lcd.print("                    "); // Effacer ligne 3
+void printBigNumber(int number, int col, int lign) {
+  lcd.setCursor(col, lign); lcd.print("                    "); // Effacer ligne haute
+  lcd.setCursor(col, lign+1); lcd.print("                    "); // Effacer ligne basse
   
   // Convertir en string pour compter les chiffres
   String numStr = String(number);
@@ -230,7 +230,7 @@ void printBigNumber(int number, int col) {
   // Afficher chaque chiffre
   for(int i = 0; i < numDigits; i++) {
     int digit = numStr.charAt(i) - '0';  // Convertir char en int
-    printBigDigit(digit, col + (i * 4), 0);
+    printBigDigit(digit, col + (i * 4), lign);
   }
 }
 
@@ -446,8 +446,7 @@ void loop() {
     lcd.setCursor(0, 3);
     Serial.print("bright : ");
     Serial.print(bright);
-    lcd.setCursor(0, 1);
-    printBigNumber((int)tempAHT.temperature,3);
+    printBigNumber((int)tempAHT.temperature,0,3);
   }
 
   /*Toutes les 30' vérification mqtt */
