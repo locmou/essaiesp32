@@ -37,6 +37,10 @@ uint8_t bright;
 #define ADC_RESOLUTION 4095.0   // Résolution ADC 12 bits ESP32
 float Ro = 1.95;  // Résistance du capteur dans l'air pur (valeur par défaut, à calibrer)
 unsigned long last_3m_time = -CYCLE_3mn;
+int rawValue;
+float rs;
+float ratio;
+float ppm;
 
 // Caractères personnalisés optimisés pour chiffres LCD
 byte LT[8] = {B00111, B01111, B11111, B11111, B11111, B11111, B11111, B11111};  // 0: Left Top
@@ -402,6 +406,17 @@ void setup() {
     Adafruit_BMP280::FILTER_X16,
     Adafruit_BMP280::STANDBY_MS_500
   );
+
+  // Première lecture sensor (puis toutes les 30s dans le loop)
+  sensors_event_t humid, tempAHT;
+  aht.getEvent(&humid, &tempAHT);
+  float press_hPa = bmp.readPressure() / 100.0F;
+  
+  int rawValue = analogRead(MQ7_PIN);
+  float rs = readRS(rawValue);
+  float ratio = rs / Ro;
+  float ppm = calculatePPM(ratio);
+   
   
   Serial.println("Setup terminé !");
 } 
@@ -418,7 +433,6 @@ void loop() {
 
   /* toutes les secondes : client loop et actualisation du bright*/
 
-
   // ===== CLIENT.LOOP() TOUTES LES SECONDES et ajustement éclairage =====
   if (now - last_1s_time >= 1000) {
     last_1s_time = now;
@@ -429,6 +443,8 @@ void loop() {
     Retroeclairage();
     Serial.print("bright : ");
     Serial.println(bright);
+
+
   }
 
   /*Toutes les 30' vérification mqtt et mesures et affichage*/
@@ -463,8 +479,6 @@ void loop() {
     } else {
       lcd.printf("P:%.0f Lum:%-3d    ", press_hPa, bright);
     }
-
-
 
     // 1. Vérifier WiFi
     if (WiFi.status() != WL_CONNECTED) {
@@ -526,10 +540,7 @@ void loop() {
   }
 
   // ===== AFFICHAGE LCD LIGNES 2-3 (continue même sans WiFi/MQTT) =====
-  int rawValue = analogRead(MQ7_PIN);
-  float rs = readRS(rawValue);
-  float ratio = rs / Ro;
-  float ppm = calculatePPM(ratio);
+
 
   // Alternance d'affichage
   if (now - lastDisplayChange >= DISPLAY_DURATION) {
