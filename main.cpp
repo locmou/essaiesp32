@@ -42,6 +42,8 @@ float rs;
 float ratio;
 float ppm;
 float press_hPa;
+float tempture;
+float Humite;
 
 // Caractères personnalisés optimisés pour chiffres LCD
 byte LT[8] = {B00111, B01111, B11111, B11111, B11111, B11111, B11111, B11111};  // 0: Left Top
@@ -412,6 +414,8 @@ void setup() {
   sensors_event_t humid, tempAHT;
   aht.getEvent(&humid, &tempAHT);
   float press_hPa = bmp.readPressure() / 100.0F;
+  float tempture=tempAHT.temperature;
+  float Humite=humid.relative_humidity;
   
   int rawValue = analogRead(MQ7_PIN);
   float rs = readRS(rawValue);
@@ -446,8 +450,9 @@ void loop() {
     lcd.setCursor(0, 3);
     Serial.print("bright : ");
     Serial.print(bright);
-    printBigNumber((int)tempAHT.temperature,0,3);
+    printBigNumber((int)tempture,0,3);
   }
+
 
   /*Toutes les 30' vérification mqtt */
 
@@ -459,6 +464,8 @@ void loop() {
     sensors_event_t humid, tempAHT;
     aht.getEvent(&humid, &tempAHT);
     float press_hPa = bmp.readPressure() / 100.0F;
+    float tempture=tempAHT.temperature;
+    float Humite=humid.relative_humidity;
     
     int rawValue = analogRead(MQ7_PIN);
     float rs = readRS(rawValue);
@@ -523,8 +530,8 @@ void loop() {
       client.publish("stationair/status", "online", true);
       
       JsonDocument doc;
-      doc["temperature"] = tempAHT.temperature;
-      doc["humidity"] = humid.relative_humidity;
+      doc["temperature"] = tempture;
+      doc["humidity"] = Humite;
       doc["pressure"] = press_hPa;
       doc["co"] = ppm;
 
