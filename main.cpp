@@ -414,7 +414,7 @@ void setup() {
   sensors_event_t humid, tempAHT;
   aht.getEvent(&humid, &tempAHT);
   float press_hPa = bmp.readPressure() / 100.0F;
-  float tempture=tempAHT.temperature;
+  float tempture=(int)tempAHT.temperature;
   float Humite=humid.relative_humidity;
   
   int rawValue = analogRead(MQ7_PIN);
@@ -449,8 +449,10 @@ void loop() {
     Retroeclairage();
     lcd.setCursor(0, 3);
     Serial.print("bright : ");
-    Serial.print(bright);
-    printBigNumber((int)tempture,0,3);
+    Serial.println(bright);
+    Serial.print("temp : ");
+    Serial.println((int)tempture);
+    printBigNumber((int)tempture,4,1);
   }
 
 
@@ -464,7 +466,7 @@ void loop() {
     sensors_event_t humid, tempAHT;
     aht.getEvent(&humid, &tempAHT);
     float press_hPa = bmp.readPressure() / 100.0F;
-    float tempture=tempAHT.temperature;
+    float tempture=(int)tempAHT.temperature;
     float Humite=humid.relative_humidity;
     
     int rawValue = analogRead(MQ7_PIN);
