@@ -57,12 +57,12 @@ byte block[8] = {B11111, B11111, B11111, B11111, B11111, B11111, B11111, B11111}
 
 // ========== VARIABLES AFFICHAGE LCD ==========
 // Variables pour l'alternance d'affichage
-unsigned long lastDisplayChange = 0;
 const unsigned long DISPLAY_DURATION = 9000;  // 5 secondes
+unsigned long lastDisplayChange = -DISPLAY_DURATION;
 bool showBigPPM = true;  // true = afficher PPM, false = afficher détails
 // Variables pour le défilement des infos
-unsigned long lastInfoChange = 0;
 const unsigned long INFO_DURATION = 3000;  // 3sec par info
+unsigned long lastInfoChange = -INFO_DURATION;
 int currentInfo = 0;  // 0=RS, 1=Ratio, 2=Brut
 int lastDisplayedInfo = -1;  // Pour savoir si l'affichage a changé
 
@@ -217,23 +217,37 @@ void printBigDigit(int digit, int col, int row) {
   }
 }
 
-// Affiche un nombre entier en gros au centre des lignes 2-3
-void printBigNumber(int number, int col, int lign) {
+// Affiche un nombre entier en gros avec une décimale sur la ligne lign et colonne col
+void printBigNumber(float number, int col, int lign) {
+
+  int entier = (int)number;
+  int decimale = (int)((number - entier) * 10);
+
   lcd.setCursor(col, lign); lcd.print("                    "); // Effacer ligne haute
   lcd.setCursor(col, lign+1); lcd.print("                    "); // Effacer ligne basse
   
   // Convertir en string pour compter les chiffres
-  String numStr = String(number);
-  int numDigits = numStr.length();
+  String entierStr = String(entier);
+  int numDigitsEntier = entierStr.length();
+
   /*/
   // Calcul position de départ pour centrer (chaque chiffre = 3 colonnes + 1 espace)
   int startCol = (20 - (numDigits * 4 - 1)) / 2;
   */
+
   // Afficher chaque chiffre
-  for(int i = 0; i < numDigits; i++) {
-    int digit = numStr.charAt(i) - '0';  // Convertir char en int
+  for(int i = 0; i < entierStr.length(); i++) {
+    int digit = entierStr.charAt(i) - '0';  // Convertir char en int
     printBigDigit(digit, col + (i * 4), lign);
   }
+
+  // Point décimal (caractère standard '.')
+  int pointCol = col + (numDigitsEntier * 4);
+  lcd.setCursor(pointCol, lign+1);
+  lcd.print(".");  // ← Point standard du LCD
+
+  // Partie décimale
+  printBigDigit(decimale, pointCol+1, lign);
 }
 
 void setup_wifi() {
@@ -413,14 +427,14 @@ void setup() {
   // Première lecture sensor (puis toutes les 30s dans le loop)
   sensors_event_t humid, tempAHT;
   aht.getEvent(&humid, &tempAHT);
-  float press_hPa = bmp.readPressure() / 100.0F;
-  float tempture=(int)tempAHT.temperature;
-  float Humite=humid.relative_humidity;
+  press_hPa = bmp.readPressure() / 100.0F;
+  tempture=tempAHT.temperature;
+  Humite=humid.relative_humidity;
   
-  int rawValue = analogRead(MQ7_PIN);
-  float rs = readRS(rawValue);
-  float ratio = rs / Ro;
-  float ppm = calculatePPM(ratio);
+  rawValue = analogRead(MQ7_PIN);
+  rs = readRS(rawValue);
+  ratio = rs / Ro;
+  ppm = calculatePPM(ratio);
    
   
   Serial.println("Setup terminé !");
@@ -451,8 +465,8 @@ void loop() {
     Serial.print("bright : ");
     Serial.println(bright);
     Serial.print("temp : ");
-    Serial.println((int)tempture);
-    printBigNumber((int)tempture,4,1);
+    Serial.println(tempture);
+    printBigNumber(tempture,0,0);
   }
 
 
@@ -465,14 +479,14 @@ void loop() {
     // Lecture capteurs
     sensors_event_t humid, tempAHT;
     aht.getEvent(&humid, &tempAHT);
-    float press_hPa = bmp.readPressure() / 100.0F;
-    float tempture=(int)tempAHT.temperature;
-    float Humite=humid.relative_humidity;
+    press_hPa = bmp.readPressure() / 100.0F;
+    tempture=tempAHT.temperature;
+    Humite=humid.relative_humidity;
     
-    int rawValue = analogRead(MQ7_PIN);
-    float rs = readRS(rawValue);
-    float ratio = rs / Ro;
-    float ppm = calculatePPM(ratio);
+    rawValue = analogRead(MQ7_PIN);
+    rs = readRS(rawValue);
+    ratio = rs / Ro;
+    ppm = calculatePPM(ratio);
    
     // Affichage série
     Serial.println("===== Mesures =====");
