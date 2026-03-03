@@ -459,14 +459,11 @@ void loop() {
     if (client.connected()) {
       client.loop();
     }
-    //ajuste en permanence l'intensité du rétroéclairage
+    //ajuste en permanence l'intensité du rétroéclairage et affiche les mesures sur le port série
     Retroeclairage();
-    lcd.setCursor(0, 3);
-    Serial.print("bright : ");
-    Serial.println(bright);
-    Serial.print("temp : ");
-    Serial.println(tempture);
-    printBigNumber(tempture,0,0);
+    Serial.println("===== Mesures =====");
+    Serial.printf("Bright: %.1f |T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.8fppm\n", bright, tempture, Humite, press_hPa, ppm);
+    printBigNumber(tempture,3,0);
   }
 
 
@@ -489,20 +486,19 @@ void loop() {
     ppm = calculatePPM(ratio);
    
     // Affichage série
-    Serial.println("===== Mesures =====");
-    Serial.printf("T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.0fppm\n", tempAHT.temperature, humid.relative_humidity, press_hPa, ppm);
-    
-    // LCD ligne 0-1
-    lcd.setCursor(0, 0); 
+    Serial.println("===== Nouvelles mesures =====");
+
+    // LCD ligne 2-3
+    lcd.setCursor(0, 2); 
     lcd.printf("Tmp:%.1fC Hum:%.1f%%", tempAHT.temperature, humid.relative_humidity);
-    lcd.setCursor(0, 1);
+    lcd.setCursor(0, 3);
     // Afficher statut connexion
     if (WiFi.status() != WL_CONNECTED) {
       lcd.print("WiFi:OFF ");
     } else if (!client.connected()) {
       lcd.print("MQTT:OFF ");
     } else {
-      lcd.printf("P:%.0f Lum:%-3d    ", press_hPa, bright);
+      lcd.printf("P:%.0f Lum:%-3d CO:%.4f   ", press_hPa, bright, ppm);
     }
 
     // 1. Vérifier WiFi
@@ -525,7 +521,7 @@ void loop() {
       mqttWasDisconnected = true;
       reconnect_mqtt();
     }
-
+/*
     // 3. Effacer le message si MQTT vient de se connecter
   if (mqttWasDisconnected && client.connected()) {
     lcd.setCursor(0, 1);
@@ -535,6 +531,7 @@ void loop() {
     lcd.setCursor(0, 1);
     lcd.print("                   ");  // Effacer complètement
   }
+    */
   }
 
   // ===== Envoi périodique MQTT (toutes les 3 minutes) =====
@@ -563,52 +560,6 @@ void loop() {
       Serial.println("MQTT: Non connecté, données non publiées");
     }
   }
-/*
-  // ===== AFFICHAGE LCD LIGNES 2-3 =====
-  // Alternance d'affichage
-  if (now - lastDisplayChange >= DISPLAY_DURATION) {
-    lastDisplayChange = now;
-    showBigPPM = !showBigPPM;
-    currentInfo = 0;
-    lastInfoChange = now;
-  }
 
-  if (showBigPPM) {
-    if (lastDisplayedInfo != -2) {
-      lcd.setCursor(0, 2); lcd.print("                    ");
-      lcd.setCursor(0, 3); lcd.print("                    ");
-      printBigNumber((int)ppm);
-      lcd.setCursor(0, 3); lcd.print("CO :");
-      lcd.setCursor(17, 3); lcd.print("ppm");
-      lastDisplayedInfo = -2;
-    }
-  } else {
-    if (now - lastInfoChange >= INFO_DURATION) {
-      lastInfoChange = now;
-      currentInfo = (currentInfo + 1) % 3;
-    }
-    
-    if (lastDisplayedInfo != currentInfo) {
-      lcd.setCursor(0, 2); lcd.print("                    ");
-      lcd.setCursor(0, 3); lcd.print("                    ");
-      
-      switch(currentInfo) {
-        case 0:
-          lcd.setCursor(0, 2); lcd.print("RS (Resistance):");
-          lcd.setCursor(0, 3); lcd.printf("%.2f kOhms", rs);
-          break;
-        case 1:
-          lcd.setCursor(0, 2); lcd.print("Ratio RS/Ro:");
-          lcd.setCursor(0, 3); lcd.printf("%.2f", ratio);
-          break;
-        case 2:
-          lcd.setCursor(0, 2); lcd.print("Valeur brute ADC:");
-          lcd.setCursor(0, 3); lcd.print(rawValue);
-          break;
-      }
-      lastDisplayedInfo = currentInfo;
-    }
-  }
-*/
   delay(10);
 } // FIN du loop
