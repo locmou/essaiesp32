@@ -463,7 +463,9 @@ void loop() {
     Retroeclairage();
     Serial.println("===== Mesures =====");
     Serial.printf("Bright: %.1f |T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.8fppm\n", bright, tempture, Humite, press_hPa, ppm);
-    printBigNumber(tempture,3,0);
+    printBigNumber(tempture,4,0);
+    lcd.setCursor(16, 1);
+    lcd.print("°C");
   }
 
 
@@ -490,7 +492,7 @@ void loop() {
 
     // LCD ligne 2-3
     lcd.setCursor(0, 2); 
-    lcd.printf("Tmp:%.1fC Hum:%.1f%%", tempAHT.temperature, humid.relative_humidity);
+    lcd.printf("Hum:%4.1f%%  P:%4.0fhPa",Humite, press_hPa);
     lcd.setCursor(0, 3);
     // Afficher statut connexion
     if (WiFi.status() != WL_CONNECTED) {
@@ -498,7 +500,7 @@ void loop() {
     } else if (!client.connected()) {
       lcd.print("MQTT:OFF ");
     } else {
-      lcd.printf("P:%.0f Lum:%-3d CO:%.4f   ", press_hPa, bright, ppm);
+      lcd.printf("CO:%7.5f  Lum:%-3d  ", ppm, bright);
     }
 
     // 1. Vérifier WiFi
