@@ -533,7 +533,6 @@ void loop() {
       lcd.setCursor(0, 3);
       lcd.print("                   ");  // Effacer complètement
     }
-    
   }
 
   // ===== Envoi périodique MQTT (toutes les 3 minutes) =====
