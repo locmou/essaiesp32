@@ -504,7 +504,7 @@ void loop() {
     // 1. Vérifier WiFi
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi perdu, reconnexion...");
-      lcd.setCursor(0, 1);
+      lcd.setCursor(0, 3);
       lcd.print("WiFi OFF - Reconnex");
       setup_wifi();
       
@@ -516,22 +516,22 @@ void loop() {
     // 2. Vérifier MQTT (seulement si WiFi OK)
     if (WiFi.status() == WL_CONNECTED && !client.connected()) {
       Serial.println("MQTT déconnecté, reconnexion...");
-      lcd.setCursor(0, 1);
+      lcd.setCursor(0, 3);
       lcd.print("MQTT OFF - Reconnex");
       mqttWasDisconnected = true;
       reconnect_mqtt();
     }
-/*
+
     // 3. Effacer le message si MQTT vient de se connecter
-  if (mqttWasDisconnected && client.connected()) {
-    lcd.setCursor(0, 1);
-    lcd.print("MQTT OK            ");  // Effacer le message
-    mqttWasDisconnected = false;
-    delay(1000);  // Afficher "MQTT OK" pendant 1 seconde
-    lcd.setCursor(0, 1);
-    lcd.print("                   ");  // Effacer complètement
-  }
-    */
+    if (mqttWasDisconnected && client.connected()) {
+      lcd.setCursor(0, 3);
+      lcd.print("MQTT OK            ");  // Effacer le message
+      mqttWasDisconnected = false;
+      delay(1000);  // Afficher "MQTT OK" pendant 1 seconde
+      lcd.setCursor(0, 3);
+      lcd.print("                   ");  // Effacer complètement
+    }
+    
   }
 
   // ===== Envoi périodique MQTT (toutes les 3 minutes) =====
