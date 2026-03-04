@@ -223,8 +223,8 @@ void printBigNumber(float number, int col, int lign) {
   int entier = (int)number;
   int decimale = (int)((number - entier) * 10);
 
-  lcd.setCursor(col, lign); lcd.print("                    "); // Effacer ligne haute
-  lcd.setCursor(col, lign+1); lcd.print("                    "); // Effacer ligne basse
+  lcd.setCursor(0, lign); lcd.print("                    "); // Effacer ligne haute
+  lcd.setCursor(0, lign+1); lcd.print("                    "); // Effacer ligne basse
   
   // Convertir en string pour compter les chiffres
   String entierStr = String(entier);
@@ -462,10 +462,11 @@ void loop() {
     //ajuste en permanence l'intensité du rétroéclairage et affiche les mesures sur le port série
     Retroeclairage();
     Serial.println("===== Mesures =====");
-    Serial.printf("Bright: %.1f |T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.8fppm\n", bright, tempture, Humite, press_hPa, ppm);
+    Serial.printf("Bright: %i |T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.6fppm\n", bright, tempture, Humite, press_hPa, ppm);
     printBigNumber(tempture,4,0);
     lcd.setCursor(16, 1);
-    lcd.print("°C");
+    lcd.write(0xDF);
+    lcd.print("C");
   }
 
 
@@ -500,7 +501,7 @@ void loop() {
     } else if (!client.connected()) {
       lcd.print("MQTT:OFF ");
     } else {
-      lcd.printf("CO:%7.5f  Lum:%-3d  ", ppm, bright);
+      lcd.printf("CO:%7.4f  Lum:%-3d  ", ppm, bright);
     }
 
     // 1. Vérifier WiFi
