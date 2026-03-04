@@ -76,9 +76,9 @@ const char* mqtt_user = "loic.mounier@laposte.net";
 const char* mqtt_pass = "vgo:?2258H";
 
 // ========== AJOUT : Variables pour gestion des reconnexions ==========
-unsigned long last_30s_time = 0;
 unsigned long last_1s_time = 0; 
 const unsigned long CYCLE_30s = 30000;   // Vérifier WiFi toutes les 30s
+unsigned long last_30s_time = -CYCLE_30s;
 int mqttReconnectAttempts = 0;
 const int MAX_MQTT_ATTEMPTS = 3;                   // Max 3 tentatives avant d'abandonner temporairement
 static bool mqttWasDisconnected = false;  
@@ -280,7 +280,6 @@ void setup_wifi() {
   }
 }
 
-
 void reconnect_mqtt() {
 
   mqttReconnectAttempts++;
@@ -463,10 +462,6 @@ void loop() {
     Retroeclairage();
     Serial.println("===== Mesures =====");
     Serial.printf("Bright: %i |T: %.1f°C | H: %.1f%% | P: %.0fhPa | CO: %.6fppm\n", bright, tempture, Humite, press_hPa, ppm);
-    printBigNumber(tempture,4,0);
-    lcd.setCursor(16, 1);
-    lcd.write(0xDF);
-    lcd.print("C");
   }
 
 
@@ -490,6 +485,13 @@ void loop() {
    
     // Affichage série
     Serial.println("===== Nouvelles mesures =====");
+
+  
+     // LCD ligne 0 - 1
+    printBigNumber(tempture,4,0);
+    lcd.setCursor(16, 1);
+    lcd.write(0xDF);
+    lcd.print("C");
 
     // LCD ligne 2-3
     lcd.setCursor(0, 2); 
