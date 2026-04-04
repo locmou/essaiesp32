@@ -260,14 +260,14 @@ modeaff aff;
 const char* topic = "lcd/display";
 
 void displayLine(int line, const char* label, const char* value, const char* unit) {
-  lcd.setCursor(0, line);
-  lcd.print("                    "); // clear line
-  lcd.setCursor(0, line);
+  //lcd.setCursor(0, (int)line/2);
+  //lcd.print("                    "); // clear line
+  lcd.setCursor(line*10-(20*(int)(line/2)), (int)(line/2));
 
   lcd.print(label);
   lcd.print(": ");
-  lcd.print(value);
-  lcd.print(unit);
+  //lcd.print(value);
+  //lcd.print(unit);
 }
 void callback(char* topic, byte* payload, unsigned int length) {
   JsonDocument doc;
