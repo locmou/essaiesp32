@@ -240,6 +240,7 @@ const char discovery_select_slot4[] PROGMEM = R"({
 
 char mqttBuffer[600];
 
+
 // ========== MODES AFFICHAGE ==========
 enum modeaff {
   MODE_T,
@@ -251,6 +252,43 @@ modeaff aff;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// FONCTIONS ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// ajouté ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+const char* topic = "lcd/display";
+
+void displayLine(int line, const char* label, const char* value, const char* unit) {
+  lcd.setCursor(0, line);
+  lcd.print("                    "); // clear line
+  lcd.setCursor(0, line);
+
+  lcd.print(label);
+  lcd.print(": ");
+  lcd.print(value);
+  lcd.print(unit);
+}
+void callback(char* topic, byte* payload, unsigned int length) {
+  JsonDocument doc;
+
+  DeserializationError error = deserializeJson(doc, payload, length);
+  if (error) return;
+
+  for (int i = 0; i < 4; i++) {
+    const char* label = doc["lines"][i]["label"] | "";
+    const char* value = doc["lines"][i]["value"] | "--";
+    const char* unit  = doc["lines"][i]["unit"]  | "";
+
+    displayLine(i, label, value, unit);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// ajouté ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// ajouté ////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Retroeclairage() {
@@ -653,7 +691,8 @@ void reconnect_mqtt() {
     
     Serial.println(" OK !");
     mqttReconnectAttempts = 0;
-    
+    client.subscribe(topic);
+    /*
     client.publish("stationair/status", "online", true);
     client.loop();
     delay(100);
@@ -778,7 +817,7 @@ void reconnect_mqtt() {
     
     client.publish("stationair/data",
                    "{\"temperature\":0,\"humidity\":0,\"co\":0,\"pressure\":0}",
-                   true);
+                   true);*/
     
   } else {
     Serial.print(" Échec (");
@@ -802,7 +841,19 @@ void setup() {
   // Configuration MQTT
   client.setBufferSize(1700);
   client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(mqtt_callback);  // ← IMPORTANT !
+  //
+  //
+  //client.setCallback(mqtt_callback);  // ← IMPORTANT !
+  //
+  //
+  //        Modifié:
+  client.setCallback(callback);
+
+  //
+  //
+  //
+  //
+
   client.setKeepAlive(60);
   client.setSocketTimeout(5);
 
@@ -874,7 +925,7 @@ void loop() {
   // ===== CAPTEURS + AFFICHAGE TOUTES LES 30s =====
   if (now - last_30s_time >= CYCLE_30s) {
     last_30s_time = now;
-
+/*
     // Lecture capteurs
     sensors_event_t humid, tempAHT;
     aht.getEvent(&humid, &tempAHT);
@@ -897,7 +948,7 @@ void loop() {
       else if (aff == MODE_P) affichageModeP();
       else if (aff == MODE_InfoHA) affichageModeInfoHA();  // ← NOUVEAU !
     }
-
+*/
     // Vérifier WiFi
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi perdu");
@@ -928,7 +979,7 @@ void loop() {
       lcd.print("                   ");
     }
   }
-
+/*
   // ===== PUBLICATION MQTT (toutes les 3 minutes) =====
   if (now - last_3m_time > CYCLE_3mn) {
     last_3m_time = now;
@@ -954,6 +1005,6 @@ void loop() {
       Serial.println("MQTT: Non connecté");
     }
   }
-
+*/
   delay(10);
 }
