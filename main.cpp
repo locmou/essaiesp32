@@ -279,12 +279,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   DeserializationError error = deserializeJson(doc, payload, length);
   if (error) return;
-
+  clean2prems(0);  
   for (int i = 0; i < 4; i++) {
     const char* label = doc["lines"][i]["label"] | "";
     const char* value = doc["lines"][i]["value"] | "--";
     const char* unit  = doc["lines"][i]["unit"]  | "";
-    clean2prems(0); 
+   
     displayLine(i, label, value, unit);
   }
 }
